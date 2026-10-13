@@ -1,7 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { Task, TaskCounts, TitleValidation } from '../types/task';
+import type { Priority, Task, TaskCounts, TitleValidation } from '../types/task';
 import {
   addTask as addToList,
   countTasks,
@@ -27,7 +27,7 @@ export interface UseTasksResult {
   loading: boolean;
   /** Mensaje si falló leer o guardar; `null` si todo va bien. */
   storageError: string | null;
-  addTask: (title: string) => TitleValidation;
+  addTask: (title: string, priority?: Priority) => TitleValidation;
   toggleTask: (id: string) => void;
   removeTask: (id: string) => void;
 }
@@ -74,10 +74,10 @@ export function useTasks(): UseTasksResult {
   }, []);
 
   const addTask = useCallback(
-    (title: string): TitleValidation => {
+    (title: string, priority?: Priority): TitleValidation => {
       const result = validateTitle(title);
       if (result.ok) {
-        commit(addToList(tasksRef.current, createTask(result.value)));
+        commit(addToList(tasksRef.current, createTask(result.value, Date.now(), priority)));
       }
       return result;
     },

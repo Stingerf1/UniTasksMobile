@@ -1,5 +1,7 @@
 import { useColorScheme } from 'react-native';
 
+import type { Priority } from '../types/task';
+
 /** Colores que usa la app. Hay una versión clara y una oscura. */
 export interface Palette {
   background: string;
@@ -11,6 +13,8 @@ export interface Palette {
   onPrimary: string;
   danger: string;
   placeholder: string;
+  /** Color de cada prioridad (insignia y selector). */
+  priority: Record<Priority, string>;
 }
 
 export const lightColors: Palette = {
@@ -23,6 +27,7 @@ export const lightColors: Palette = {
   onPrimary: '#FFFFFF',
   danger: '#B42318',
   placeholder: '#8E8B9A',
+  priority: { alta: '#B42318', media: '#B54708', baja: '#027A48' },
 };
 
 export const darkColors: Palette = {
@@ -35,6 +40,7 @@ export const darkColors: Palette = {
   onPrimary: '#1C1033',
   danger: '#F97066',
   placeholder: '#7D7A8A',
+  priority: { alta: '#F97066', media: '#FDB022', baja: '#32D583' },
 };
 
 /** Devuelve la paleta según el tema del teléfono (claro u oscuro). */

@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { MIN_TOUCH, type Palette } from '../theme/colors';
 import type { Task } from '../types/task';
 import { confirmDelete } from '../utils/confirm';
+import { PRIORITY_LABELS } from './PrioritySelector';
 
 export interface TaskItemProps {
   task: Task;
@@ -29,6 +30,7 @@ function TaskItemBase({ task, onToggle, onDelete, colors }: TaskItemProps) {
       accessibilityRole="checkbox"
       accessibilityState={{ checked: task.done }}
       accessibilityLabel={task.title}
+      accessibilityValue={{ text: `Prioridad ${PRIORITY_LABELS[task.priority].toLowerCase()}` }}
       accessibilityHint="Toca para marcarla. Mantén presionado para eliminarla."
       accessibilityActions={[{ name: 'longpress', label: 'Eliminar' }]}
       onAccessibilityAction={(event) => {
@@ -59,6 +61,11 @@ function TaskItemBase({ task, onToggle, onDelete, colors }: TaskItemProps) {
       >
         {task.title}
       </Text>
+      <View style={[styles.badge, { borderColor: colors.priority[task.priority] }]}>
+        <Text style={[styles.badgeText, { color: colors.priority[task.priority] }]}>
+          {PRIORITY_LABELS[task.priority]}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -96,5 +103,15 @@ const styles = StyleSheet.create({
   },
   titleDone: {
     textDecorationLine: 'line-through',
+  },
+  badge: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { MIN_TOUCH, type Palette } from '../theme/colors';
-import type { TitleValidation } from '../types/task';
+import { DEFAULT_PRIORITY, type Priority, type TitleValidation } from '../types/task';
 import { countChars, TITLE_MAX_LENGTH } from '../utils/validation';
+import { PrioritySelector } from './PrioritySelector';
 
 export interface TaskInputProps {
-  /** Recibe el texto escrito y responde si se pudo agregar. */
-  onSubmit: (title: string) => TitleValidation;
+  /** Recibe el texto escrito y la prioridad elegida, y responde si se pudo agregar. */
+  onSubmit: (title: string, priority: Priority) => TitleValidation;
   /** Bloquea el campo (por ejemplo, mientras cargan las tareas). */
   disabled?: boolean;
   colors: Palette;
@@ -17,16 +18,18 @@ export interface TaskInputProps {
 export function TaskInput({ onSubmit, disabled = false, colors }: TaskInputProps) {
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [priority, setPriority] = useState<Priority>(DEFAULT_PRIORITY);
 
   const length = countChars(text.trim());
   const overLimit = length > TITLE_MAX_LENGTH;
 
   function handleSubmit() {
     if (disabled) return;
-    const result = onSubmit(text);
+    const result = onSubmit(text, priority);
     if (result.ok) {
       setText('');
       setError(null);
+      setPriority(DEFAULT_PRIORITY);
     } else {
       setError(result.error);
     }
@@ -48,6 +51,8 @@ export function TaskInput({ onSubmit, disabled = false, colors }: TaskInputProps
           {error}
         </Text>
       ) : null}
+
+      <PrioritySelector value={priority} onChange={setPriority} disabled={disabled} colors={colors} />
 
       <View style={styles.row}>
         <TextInput
