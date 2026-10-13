@@ -8,13 +8,20 @@ import {
   countTasks,
   createTask,
   formatCounts,
+  isPriority,
   makeId,
   parseStoredTasks,
   removeTask,
   toggleTask,
 } from '../utils/taskList';
 
-const tarea = (id: string, done = false): Task => ({ id, title: `Tarea ${id}`, done, createdAt: 1 });
+const tarea = (id: string, done = false): Task => ({
+  id,
+  title: `Tarea ${id}`,
+  done,
+  createdAt: 1,
+  priority: 'media',
+});
 
 describe('createTask y makeId', () => {
   test('crea una tarea pendiente con la fecha indicada', () => {
@@ -110,5 +117,41 @@ describe('parseStoredTasks (datos guardados en el teléfono)', () => {
   test('descarta elementos que no tienen forma de tarea', () => {
     const json = JSON.stringify([tarea('1'), null, 5, { id: '2', title: 'sin done' }, tarea('3', true)]);
     expect(parseStoredTasks(json).map((t) => t.id)).toEqual(['1', '3']);
+  });
+});
+
+describe('prioridad (feature/prioridad)', () => {
+  test('sin indicar prioridad, la tarea nueva queda en "media"', () => {
+    expect(createTask('Algo', 1).priority).toBe('media');
+  });
+
+  test('respeta la prioridad elegida', () => {
+    expect(createTask('Algo', 1, 'alta').priority).toBe('alta');
+  });
+
+  test.each([
+    ['alta', true],
+    ['media', true],
+    ['baja', true],
+    ['urgente', false],
+    [3, false],
+    [undefined, false],
+  ])('isPriority(%p) → %s', (valor, esperado) => {
+    expect(isPriority(valor)).toBe(esperado);
+  });
+
+  test('compatibilidad: tareas guardadas por la versión anterior (sin prioridad) pasan a "media"', () => {
+    const vieja = { id: '1', title: 'De la v1', done: false, createdAt: 1 };
+    expect(parseStoredTasks(JSON.stringify([vieja]))).toEqual([{ ...vieja, priority: 'media' }]);
+  });
+
+  test('una prioridad desconocida se corrige a "media"', () => {
+    const rara = { id: '1', title: 'Rara', done: false, createdAt: 1, priority: 'urgente' };
+    expect(parseStoredTasks(JSON.stringify([rara]))[0].priority).toBe('media');
+  });
+
+  test('una prioridad válida guardada se conserva', () => {
+    const baja = { ...tarea('1'), priority: 'baja' };
+    expect(parseStoredTasks(JSON.stringify([baja]))[0].priority).toBe('baja');
   });
 });

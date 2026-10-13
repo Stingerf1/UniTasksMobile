@@ -25,7 +25,7 @@ beforeEach(async () => {
 });
 
 test('al abrir, carga las tareas guardadas', async () => {
-  const previa: Task = { id: 'a', title: 'Tarea guardada', done: true, createdAt: 1 };
+  const previa: Task = { id: 'a', title: 'Tarea guardada', done: true, createdAt: 1, priority: 'alta' };
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify([previa]));
 
   const { result } = await renderCargado();
@@ -134,4 +134,15 @@ test('si la pantalla se cierra y la lectura falla después, tampoco actualiza na
 
   await act(async () => fallarCarga(new Error('tarde')));
   expect(result.current.storageError).toBeNull();
+});
+
+test('agregar con prioridad la guarda junto con la tarea', async () => {
+  const { result } = await renderCargado();
+
+  await act(async () => {
+    result.current.addTask('Parcial de redes', 'alta');
+  });
+
+  expect(result.current.tasks[0].priority).toBe('alta');
+  await waitFor(async () => expect((await guardado())[0].priority).toBe('alta'));
 });

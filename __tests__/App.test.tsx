@@ -143,7 +143,8 @@ test('al volver a abrir la app aparecen las tareas guardadas', async () => {
 
   await abrirApp();
 
-  expect(screen.getByRole('checkbox', { name: 'Guardada ayer' })).toBeOnTheScreen();
+  // Venía de la versión sin prioridad: se muestra como "Media".
+  expect(screen.getByRole('checkbox', { name: 'Guardada ayer' })).toHaveTextContent(/Media/);
 });
 
 test('con varias tareas, la más nueva queda arriba', async () => {
@@ -165,4 +166,21 @@ test('si no se pueden leer las tareas guardadas, avisa en pantalla', async () =>
   await abrirApp();
 
   expect(screen.getByRole('alert')).toHaveTextContent(STORAGE_ERRORS.load);
+});
+
+test('elegir prioridad "Alta" la muestra en la tarea y el selector vuelve a "Media"', async () => {
+  const user = userEvent.setup();
+  await abrirApp();
+
+  expect(screen.getByRole('radio', { name: 'Prioridad media' })).toBeSelected();
+  await user.press(screen.getByRole('radio', { name: 'Prioridad alta' }));
+  expect(screen.getByRole('radio', { name: 'Prioridad alta' })).toBeSelected();
+  expect(screen.getByRole('radio', { name: 'Prioridad media' })).not.toBeSelected();
+
+  await user.type(campo(), 'Parcial de redes');
+  await user.press(botonAgregar());
+
+  const fila = screen.getByRole('checkbox', { name: 'Parcial de redes' });
+  expect(fila).toHaveTextContent(/Alta/);
+  expect(screen.getByRole('radio', { name: 'Prioridad media' })).toBeSelected();
 });

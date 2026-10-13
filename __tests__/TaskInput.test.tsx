@@ -24,6 +24,15 @@ test('sin la prop disabled, envía el texto escrito tal cual', async () => {
   await fireEvent.changeText(screen.getByLabelText('Título de la tarea'), '  Algo ');
   await fireEvent.press(screen.getByRole('button', { name: 'Agregar tarea' }));
 
-  expect(onSubmit).toHaveBeenCalledWith('  Algo ');
+  expect(onSubmit).toHaveBeenCalledWith('  Algo ', 'media');
   expect(screen.getByLabelText('Título de la tarea')).toHaveDisplayValue('');
+});
+
+test('bloqueado, el selector de prioridad tampoco responde', async () => {
+  await render(<TaskInput onSubmit={jest.fn()} disabled colors={lightColors} />);
+
+  const alta = screen.getByRole('radio', { name: 'Prioridad alta' });
+  expect(alta).toBeDisabled();
+  await fireEvent.press(alta);
+  expect(alta).not.toBeSelected();
 });
